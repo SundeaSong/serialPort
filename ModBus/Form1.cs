@@ -9,6 +9,7 @@ using System.IO.Ports;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -17,11 +18,31 @@ namespace ModBus
     public partial class Form1 : Form
     {
         IniFiles ini = new IniFiles(Application.StartupPath + @"\config.ini");
+        private List<CheckBox> _lst = new List<CheckBox>();
+
+
         public Form1()
         {
             InitializeComponent();
         }
-        
+
+        protected delegate void UpdateText(string str);
+        public void UpadteLogTxt(string str)
+        {
+            if (log_txt.InvokeRequired)
+            {
+                this.BeginInvoke(new UpdateText(AppendText),str);
+            }
+            else
+            {
+                AppendText(str);
+            }
+        }
+
+        private void AppendText(string txt)
+        {
+            log_txt.Text += txt+"\r\n";
+        }
 
         private void Form1_Load(object sender, EventArgs e)
         {
@@ -60,6 +81,22 @@ namespace ModBus
                 comboBox4.Text = ini.IniReadValue("数据位", "DataBits");
                 comboBox5.Text = ini.IniReadValue("校验位","Parity");
             }
+            _lst.Add(Y1);
+            _lst.Add(Y2);
+            _lst.Add(Y3);
+            _lst.Add(Y4);
+            _lst.Add(Y5);
+            _lst.Add(Y6);
+            _lst.Add(Y7);
+            _lst.Add(Y8);
+            _lst.Add(Y9);
+            _lst.Add(Y10);
+            _lst.Add(Y11);
+            _lst.Add(Y12);
+            _lst.Add(Y13);
+            _lst.Add(Y14);
+            _lst.Add(Y15);
+            _lst.Add(Y16);
         }
         public bool btn_status = false;
         private void Btn_port_switch_Click(object sender, EventArgs e)
@@ -76,15 +113,16 @@ namespace ModBus
                     Btn_port_switch.Text = "关闭串口";
                     serialPort1.PortName = comboBox1.Text;                              //端口
                     serialPort1.BaudRate = int.Parse(comboBox2.Text);                   //波特率
+                    serialPort1.ReadBufferSize = 20;
                     switch (double.Parse(comboBox3.Text))                               //停止位
                     {
                         case 1: serialPort1.StopBits = StopBits.One; break;
-                        case 1.5: serialPort1.StopBits = StopBits.OnePointFive; break;
+                        case 1.5: serialPort1.StopBits = StopBits.OnePointFive; break; 
                         case 2: serialPort1.StopBits = StopBits.Two; break;
                         default: break;
                     }
                     serialPort1.DataBits = int.Parse(comboBox4.Text);                   //数据位
-                                                                                        //                     public enum PARITYMODE { NONE = 1, ODD = 2, EVEN = 3, MARK = 4, SPACE = 5 };
+                                                                                        //public enum PARITYMODE { NONE = 1, ODD = 2, EVEN = 3, MARK = 4, SPACE = 5 };
                     if (comboBox5.Text == "NONE")
                     {
                         serialPort1.Parity = Parity.None;
@@ -106,6 +144,61 @@ namespace ModBus
                         serialPort1.Parity = Parity.Space;
                     }
                     serialPort1.Open();
+                    ReceiveStr(serialPort1, (a) =>
+                    {
+                        if (radioButton2.Checked == true)
+                        {
+                            var tmpLst = new List<byte>();
+                            if (a.Length > 5)
+                            {
+                                var cmdTyp = a[1];
+                                if (cmdTyp == 1)//查询
+                                {
+                                    var c = _lst.FindAll(p => p.Checked).Count;//计算有多少被选中
+                                    tmpLst.Add(1);
+                                    tmpLst.Add(1);
+                                    tmpLst.Add((byte)c);
+                                    tmpLst.Add(0);
+                                    tmpLst.Add(0);
+                                    tmpLst.Add(0);
+                                }
+                                else if (cmdTyp == 5)
+                                {
+                                    var index = a[3];
+                                    var state = a[4].ToString("x2").ToLower() == "ff";
+                                    foreach (var item in _lst)
+                                    {
+                                        var nId = item.Name.Substring(1);
+                                        if (index.ToString() == nId)
+                                        {
+                                            item.Checked = state;
+                                            break;
+                                        }
+                                    }
+                                    tmpLst.AddRange(a);
+                                }
+                                else if (cmdTyp == 4)
+                                {
+                                    tmpLst.Add(1);
+                                    tmpLst.Add(4);
+                                    tmpLst.Add((byte)(num & 0x00ff));
+                                    tmpLst.Add((byte)((num & 0xff00) >> 8));
+                                }
+                                else
+                                {
+                                    UpadteLogTxt($"无此命令");
+                                }
+                            }
+                            else
+                            {
+                                UpadteLogTxt(string.Join(" ", a));
+                            }
+                        }
+                        else if (radioButton1.Checked == true)
+                        {
+                            UpadteLogTxt(ASCIIEncoding.ASCII.GetString(a));
+                        }
+                    });
                 }
                 else if (btn_status == true)
                 {
@@ -152,35 +245,41 @@ namespace ModBus
 
         private void serialPort1_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
+            
+        }
 
-            int ReceiveNums = serialPort1.BytesToRead;
-            byte[] data = { 0 ,0,0,0,0,0};
-            if (radioButton2.Checked == true)
-            {
-                serialPort1.Read(data, 0, ReceiveNums);
-                for (int i = 0; i < ReceiveNums; i++)
-                {
-                    log_txt.AppendText(String.Format("{0:X2} ", serialPort1.ReadByte()));
-                    
-                }
-                log_txt.AppendText("\r\n");
-               
+        protected void ReceiveStr(SerialPort str,Action<byte[]> action)
+        {
+            var receiveLen = 0;
+            var count = 0;
+            var lst = new List<byte>();
+            var mReset = new ManualResetEvent(false);
 
-            }
-            else
+
+            Task.Factory.StartNew(() =>
             {
-                if (radioButton1.Checked == true)
+                while (true)
                 {
-                    serialPort1.Encoding = System.Text.Encoding.GetEncoding("GB2312");//解决中午乱码问题，国标2312编码格式
-                    log_txt.AppendText(serialPort1.ReadExisting());
+                    byte[] buffer = new byte[20];
+                    receiveLen = str.Read(buffer, 0, buffer.Length);
+
+                    if (receiveLen > 0)
+                    {
+                        var temp = new byte[receiveLen];
+                        Array.Copy(buffer, 0, temp, 0, receiveLen);
+                        action?.Invoke(temp);
+                    }
                 }
-            }
+            });
+
+
         }
 
         private void Btn_ClearData_Click(object sender, EventArgs e)
         {
             log_txt.Text = "";
         }
+
         public int CheckOutputStatus(object send)
         {
             int checklist = 0;
@@ -275,84 +374,23 @@ namespace ModBus
             textbox_16.Text = asciiStr;
         }
         public int num = 0;
-        private void Y1_CheckedChanged(object sender, EventArgs e)
+        private void IOCheckBox_Changed(object sender, EventArgs e)
         {
-            num = CheckOutputStatus(1);
-        }
+            var check = (CheckBox)sender;
+            num = CheckOutputStatus(sender);
+            log_txt.AppendText(num.ToString("x2")+"\r\n");
+            //根据名字查找位置，并保存状态
+            //var index = int.Parse(check.Name.Substring(1));
+            //for(int i = 0; i < _lst.Count; i++)
+            //{
+            //    if(index == i)
+            //    {
+            //        _lst[i].Checked = check.Checked;
+            //        break;
+            //    }
+            //}
+            
 
-        private void Y2_CheckedChanged(object sender, EventArgs e)
-        {
-            num = CheckOutputStatus(1);
-        }
-
-        private void Y3_CheckedChanged(object sender, EventArgs e)
-        {
-            num = CheckOutputStatus(1);
-        }
-
-        private void Y4_CheckedChanged(object sender, EventArgs e)
-        {
-            num = CheckOutputStatus(1);
-        }
-
-        private void Y5_CheckedChanged(object sender, EventArgs e)
-        {
-            num = CheckOutputStatus(1);
-        }
-
-        private void Y6_CheckedChanged(object sender, EventArgs e)
-        {
-            num = CheckOutputStatus(1);
-        }
-
-        private void Y7_CheckedChanged(object sender, EventArgs e)
-        {
-            num = CheckOutputStatus(1);
-        }
-
-        private void Y8_CheckedChanged(object sender, EventArgs e)
-        {
-            num = CheckOutputStatus(1);
-        }
-
-        private void Y9_CheckedChanged(object sender, EventArgs e)
-        {
-            num = CheckOutputStatus(1);
-        }
-
-        private void Y10_CheckedChanged(object sender, EventArgs e)
-        {
-            num = CheckOutputStatus(1);
-        }
-
-        private void Y11_CheckedChanged(object sender, EventArgs e)
-        {
-            num = CheckOutputStatus(1);
-        }
-
-        private void Y12_CheckedChanged(object sender, EventArgs e)
-        {
-            num = CheckOutputStatus(1);
-        }
-
-        private void Y13_CheckedChanged(object sender, EventArgs e)
-        {
-            num = CheckOutputStatus(1);
-        }
-
-        private void Y14_CheckedChanged(object sender, EventArgs e)
-        {
-            num = CheckOutputStatus(1);
-        }
-
-        private void Y15_CheckedChanged(object sender, EventArgs e)
-        {
-            num = CheckOutputStatus(1);
-        }
-
-        private void Y16_CheckedChanged(object sender, EventArgs e)
-        {
-            num = CheckOutputStatus(1);
         }
     }
 }

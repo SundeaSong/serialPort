@@ -450,7 +450,7 @@
             this.Y7.TabIndex = 8;
             this.Y7.Text = "Y7";
             this.Y7.UseVisualStyleBackColor = true;
-            this.Y7.CheckedChanged += new System.EventHandler(this.Y7_CheckedChanged);
+            this.Y7.CheckedChanged += new System.EventHandler(this.IOCheckBox_Changed);
             // 
             // Y16
             // 
@@ -461,7 +461,7 @@
             this.Y16.TabIndex = 17;
             this.Y16.Text = "Y16";
             this.Y16.UseVisualStyleBackColor = true;
-            this.Y16.CheckedChanged += new System.EventHandler(this.Y16_CheckedChanged);
+            this.Y16.CheckedChanged += new System.EventHandler(this.IOCheckBox_Changed);
             // 
             // Y1
             // 
@@ -472,7 +472,7 @@
             this.Y1.TabIndex = 2;
             this.Y1.Text = "Y1";
             this.Y1.UseVisualStyleBackColor = true;
-            this.Y1.CheckedChanged += new System.EventHandler(this.Y1_CheckedChanged);
+            this.Y1.CheckedChanged += new System.EventHandler(this.IOCheckBox_Changed);
             // 
             // Y15
             // 
@@ -483,7 +483,7 @@
             this.Y15.TabIndex = 16;
             this.Y15.Text = "Y15";
             this.Y15.UseVisualStyleBackColor = true;
-            this.Y15.CheckedChanged += new System.EventHandler(this.Y15_CheckedChanged);
+            this.Y15.CheckedChanged += new System.EventHandler(this.IOCheckBox_Changed);
             // 
             // Y2
             // 
@@ -494,7 +494,7 @@
             this.Y2.TabIndex = 3;
             this.Y2.Text = "Y2";
             this.Y2.UseVisualStyleBackColor = true;
-            this.Y2.CheckedChanged += new System.EventHandler(this.Y2_CheckedChanged);
+            this.Y2.CheckedChanged += new System.EventHandler(this.IOCheckBox_Changed);
             // 
             // Y14
             // 
@@ -505,7 +505,7 @@
             this.Y14.TabIndex = 15;
             this.Y14.Text = "Y14";
             this.Y14.UseVisualStyleBackColor = true;
-            this.Y14.CheckedChanged += new System.EventHandler(this.Y14_CheckedChanged);
+            this.Y14.CheckedChanged += new System.EventHandler(this.IOCheckBox_Changed);
             // 
             // Y3
             // 
@@ -516,7 +516,7 @@
             this.Y3.TabIndex = 4;
             this.Y3.Text = "Y3";
             this.Y3.UseVisualStyleBackColor = true;
-            this.Y3.CheckedChanged += new System.EventHandler(this.Y3_CheckedChanged);
+            this.Y3.CheckedChanged += new System.EventHandler(this.IOCheckBox_Changed);
             // 
             // Y13
             // 
@@ -527,7 +527,7 @@
             this.Y13.TabIndex = 14;
             this.Y13.Text = "Y13";
             this.Y13.UseVisualStyleBackColor = true;
-            this.Y13.CheckedChanged += new System.EventHandler(this.Y13_CheckedChanged);
+            this.Y13.CheckedChanged += new System.EventHandler(this.IOCheckBox_Changed);
             // 
             // Y4
             // 
@@ -538,7 +538,7 @@
             this.Y4.TabIndex = 5;
             this.Y4.Text = "Y4";
             this.Y4.UseVisualStyleBackColor = true;
-            this.Y4.CheckedChanged += new System.EventHandler(this.Y4_CheckedChanged);
+            this.Y4.CheckedChanged += new System.EventHandler(this.IOCheckBox_Changed);
             // 
             // Y12
             // 
@@ -549,7 +549,7 @@
             this.Y12.TabIndex = 13;
             this.Y12.Text = "Y12";
             this.Y12.UseVisualStyleBackColor = true;
-            this.Y12.CheckedChanged += new System.EventHandler(this.Y12_CheckedChanged);
+            this.Y12.CheckedChanged += new System.EventHandler(this.IOCheckBox_Changed);
             // 
             // Y5
             // 
@@ -560,7 +560,7 @@
             this.Y5.TabIndex = 6;
             this.Y5.Text = "Y5";
             this.Y5.UseVisualStyleBackColor = true;
-            this.Y5.CheckedChanged += new System.EventHandler(this.Y5_CheckedChanged);
+            this.Y5.CheckedChanged += new System.EventHandler(this.IOCheckBox_Changed);
             // 
             // Y11
             // 
@@ -571,7 +571,7 @@
             this.Y11.TabIndex = 12;
             this.Y11.Text = "Y11";
             this.Y11.UseVisualStyleBackColor = true;
-            this.Y11.CheckedChanged += new System.EventHandler(this.Y11_CheckedChanged);
+            this.Y11.CheckedChanged += new System.EventHandler(this.IOCheckBox_Changed);
             // 
             // Y6
             // 
@@ -582,7 +582,7 @@
             this.Y6.TabIndex = 7;
             this.Y6.Text = "Y6";
             this.Y6.UseVisualStyleBackColor = true;
-            this.Y6.CheckedChanged += new System.EventHandler(this.Y6_CheckedChanged);
+            this.Y6.CheckedChanged += new System.EventHandler(this.IOCheckBox_Changed);
             // 
             // Y10
             // 
@@ -593,7 +593,7 @@
             this.Y10.TabIndex = 11;
             this.Y10.Text = "Y10";
             this.Y10.UseVisualStyleBackColor = true;
-            this.Y10.CheckedChanged += new System.EventHandler(this.Y10_CheckedChanged);
+            this.Y10.CheckedChanged += new System.EventHandler(this.IOCheckBox_Changed);
             // 
             // Y8
             // 
@@ -604,7 +604,7 @@
             this.Y8.TabIndex = 9;
             this.Y8.Text = "Y8";
             this.Y8.UseVisualStyleBackColor = true;
-            this.Y8.CheckedChanged += new System.EventHandler(this.Y8_CheckedChanged);
+            this.Y8.CheckedChanged += new System.EventHandler(this.IOCheckBox_Changed);
             // 
             // Y9
             // 
@@ -615,7 +615,7 @@
             this.Y9.TabIndex = 10;
             this.Y9.Text = "Y9";
             this.Y9.UseVisualStyleBackColor = true;
-            this.Y9.CheckedChanged += new System.EventHandler(this.Y9_CheckedChanged);
+            this.Y9.CheckedChanged += new System.EventHandler(this.IOCheckBox_Changed);
             // 
             // tabControl1
             // 
