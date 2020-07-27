@@ -1,0 +1,10 @@
+F:\C#\modbus\ModBus\ModBus\bin\Debug\ModBus.exe.config
+F:\C#\modbus\ModBus\ModBus\bin\Debug\ModBus.exe
+F:\C#\modbus\ModBus\ModBus\bin\Debug\ModBus.pdb
+F:\C#\modbus\ModBus\ModBus\obj\Debug\ModBus.csprojAssemblyReference.cache
+F:\C#\modbus\ModBus\ModBus\obj\Debug\ModBus.Form1.resources
+F:\C#\modbus\ModBus\ModBus\obj\Debug\ModBus.Properties.Resources.resources
+F:\C#\modbus\ModBus\ModBus\obj\Debug\ModBus.csproj.GenerateResource.cache
+F:\C#\modbus\ModBus\ModBus\obj\Debug\ModBus.csproj.CoreCompileInputs.cache
+F:\C#\modbus\ModBus\ModBus\obj\Debug\ModBus.exe
+F:\C#\modbus\ModBus\ModBus\obj\Debug\ModBus.pdb
