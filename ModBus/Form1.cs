@@ -146,58 +146,7 @@ namespace ModBus
                     serialPort1.Open();
                     ReceiveStr(serialPort1, (a) =>
                     {
-                        if (radioButton2.Checked == true)
-                        {
-                            var tmpLst = new List<byte>();
-                            if (a.Length > 5)
-                            {
-                                var cmdTyp = a[1];
-                                if (cmdTyp == 1)//查询
-                                {
-                                    var c = _lst.FindAll(p => p.Checked).Count;//计算有多少被选中
-                                    tmpLst.Add(1);
-                                    tmpLst.Add(1);
-                                    tmpLst.Add((byte)c);
-                                    tmpLst.Add(0);
-                                    tmpLst.Add(0);
-                                    tmpLst.Add(0);
-                                }
-                                else if (cmdTyp == 5)
-                                {
-                                    var index = a[3];
-                                    var state = a[4].ToString("x2").ToLower() == "ff";
-                                    foreach (var item in _lst)
-                                    {
-                                        var nId = item.Name.Substring(1);
-                                        if (index.ToString() == nId)
-                                        {
-                                            item.Checked = state;
-                                            break;
-                                        }
-                                    }
-                                    tmpLst.AddRange(a);
-                                }
-                                else if (cmdTyp == 4)
-                                {
-                                    tmpLst.Add(1);
-                                    tmpLst.Add(4);
-                                    tmpLst.Add((byte)(num & 0x00ff));
-                                    tmpLst.Add((byte)((num & 0xff00) >> 8));
-                                }
-                                else
-                                {
-                                    UpadteLogTxt($"无此命令");
-                                }
-                            }
-                            else
-                            {
-                                UpadteLogTxt(string.Join(" ", a));
-                            }
-                        }
-                        else if (radioButton1.Checked == true)
-                        {
-                            UpadteLogTxt(ASCIIEncoding.ASCII.GetString(a));
-                        }
+                       
                     });
                 }
                 else if (btn_status == true)
@@ -245,7 +194,65 @@ namespace ModBus
 
         private void serialPort1_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
-            
+            if (radioButton2.Checked)
+            {
+                var tmpLst = new List<byte>();
+                var serial = (SerialPort)sender;
+                byte[] buffer = new byte[20];
+                var receiveLen = serial.Read(buffer, 0, buffer.Length);
+                var temp = new byte[receiveLen];
+                Array.Copy(buffer, 0, temp, 0, receiveLen);
+               
+                if (temp.Length > 5)
+                {
+                    var cmdTyp = temp[1];
+                    if (cmdTyp == 1)//查询
+                    {
+                        var c = _lst.FindAll(p => p.Checked).Count;//计算有多少被选中
+                        tmpLst.Add(1);
+                        tmpLst.Add(1);
+                        tmpLst.Add((byte)c);
+                        tmpLst.Add(0);
+                        tmpLst.Add(0);
+                        tmpLst.Add(0);
+                    }
+                    else if (cmdTyp == 5)
+                    {
+                        var index = temp[3];
+                        var state = temp[4].ToString("x2").ToLower() == "ff";
+                        foreach (var item in _lst)
+                        {
+                            var nId = item.Name.Substring(1);
+                            if (index.ToString() == nId)
+                            {
+                                item.Checked = state;
+                                break;
+                            }
+                        }
+                        tmpLst.AddRange(temp);
+                    }
+                    else if (cmdTyp == 4)
+                    {
+                        tmpLst.Add(1);
+                        tmpLst.Add(4);
+                        tmpLst.Add((byte)(num & 0x00ff));
+                        tmpLst.Add((byte)((num & 0xff00) >> 8));
+                    }
+                    else
+                    {
+                        UpadteLogTxt($"无此命令");
+                    }
+                }
+                else
+                {
+                    UpadteLogTxt(string.Join(" ", temp));
+                }
+            }
+            else if (radioButton1.Checked)
+            {
+                serialPort1.Encoding = Encoding.GetEncoding("GB2312");
+                UpadteLogTxt(serialPort1.ReadExisting());
+            }
         }
 
         protected void ReceiveStr(SerialPort str,Action<byte[]> action)

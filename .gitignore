@@ -3,3 +3,7 @@
 ################################################################################
 
 /~$技术要求.xlsx
+/data
+/ModBus/obj/Debug/TempPE
+/.vs/ModBus/v15/Server/sqlite3
+/.vs/ModBus/v15
