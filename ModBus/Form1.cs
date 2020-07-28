@@ -17,34 +17,25 @@ namespace ModBus
 {
     public partial class Form1 : Form
     {
+        #region Field
         IniFiles ini = new IniFiles(Application.StartupPath + @"\config.ini");
         private List<CheckBox> _lst = new List<CheckBox>();
-
-        private delegate void GenerateInfo(byte[] arr);
-
+        private delegate void UpdateText(string str);
+        private delegate void GenerateInfo(SerialPort serial,byte[] arr);
+        private bool btn_status = false;
+        private int num = 0;
+        #endregion
         public Form1()
         {
             InitializeComponent();
         }
 
-        protected delegate void UpdateText(string str);
-        public void UpadteLogTxt(string str)
-        {
-            if (log_txt.InvokeRequired)
-            {
-                this.BeginInvoke(new UpdateText(AppendText),str);
-            }
-            else
-            {
-                AppendText(str);
-            }
-        }
-
-        private void AppendText(string txt)
-        {
-            log_txt.Text += txt+"\r\n";
-        }
-
+        #region EventMethod
+        /// <summary>
+        /// 初始化
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Form1_Load(object sender, EventArgs e)
         {
             this.MaximizeBox = false;    //窗口的最大化按钮失能
@@ -98,8 +89,39 @@ namespace ModBus
             _lst.Add(Y14);
             _lst.Add(Y15);
             _lst.Add(Y16);
+
+            UpdateLogTxt("程序启动");
+
         }
-        public bool btn_status = false;
+        /// <summary>
+        /// 多线程控制log输出 输出[2020-7-8 20:12:20 Debug]:log
+        /// </summary>
+        public void UpdateLogTxt(string str)
+        {
+            if (log_txt.InvokeRequired)
+            {
+                this.BeginInvoke(new UpdateText(AppendText),str);
+            }
+            else
+            {
+                AppendText(str);
+            }
+        }
+
+        /// <summary>
+        /// 不可使用
+        /// </summary>
+        /// <param name="txt"></param>
+        private void AppendText(string txt)
+        {
+            log_txt.Text += $"[{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")} Debug]: {txt}\r\n"; ;
+        }
+
+        /// <summary>
+        /// 打开串口
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Btn_port_switch_Click(object sender, EventArgs e)
         {
             if (comboBox1.SelectedItem == null)
@@ -145,75 +167,87 @@ namespace ModBus
                         serialPort1.Parity = Parity.Space;
                     }
                     serialPort1.Open();
-                    ReceiveStr(serialPort1, (a) =>
-                    {
-                       
-                    });
+                    UpdateLogTxt("打开串口");
                 }
                 else if (btn_status == true)
                 {
                     btn_status = false;
                     Btn_port_switch.Text = "打开串口";
                     serialPort1.Close();
+                    UpdateLogTxt("关闭串口");
                 }
             }
         }
 
-      
-
         /// <summary>
-        /// 点击串口的事件
+        /// 选择串口参数
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        private void ComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            //comboBox1.Items.Clear();
-            foreach (string s in System.IO.Ports.SerialPort.GetPortNames())
+            var com = (ComboBox)sender;
+            switch (com.Name.ToLower())
             {
-                comboBox1.Items.Add(s);                      //串口号显示到combobox里
+                case "combobox1":
+                    foreach (string s in System.IO.Ports.SerialPort.GetPortNames())
+                    {
+                        comboBox1.Items.Add(s);                      //串口号显示到combobox里
+                    }
+                    ini.IniWriteValue("串口号", "com", com.Text);
+                    UpdateLogTxt($"选择串口：{com.Text}");
+                    break; 
+                case "combobox2":
+                    ini.IniWriteValue("波特率", "BaudRate", com.Text);
+                    UpdateLogTxt($"选择波特率：{com.Text}");
+                    break; 
+                case "combobox3":
+                    ini.IniWriteValue("停止位", "StopBits", com.Text);
+                    UpdateLogTxt($"选择停止位：{com.Text}");
+                    break; 
+                case "combobox4":
+                    ini.IniWriteValue("数据位", "DataBits", com.Text);
+                    UpdateLogTxt($"选择数据位：{com.Text}");
+                    break;
+                case "combobox5":
+                    ini.IniWriteValue("校验位", "Parity", com.Text);
+                    UpdateLogTxt($"选择校验位：{com.Text}");
+                    break;
             }
-            ini.IniWriteValue("串口号", "com", comboBox1.Text);
+            //comboBox1.Items.Clear();
+          
         }
 
-        private void comboBox2_SelectedIndexChanged(object sender, EventArgs e)
+        /// <summary>
+        /// 串口数据接收
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void SerialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
-            ini.IniWriteValue("波特率", "BaudRate", comboBox2.Text);
-        }
-
-        private void comboBox3_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            ini.IniWriteValue("停止位", "StopBits", comboBox3.Text);
-        }
-
-        private void comboBox4_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            ini.IniWriteValue("数据位", "DataBits", comboBox4.Text);
-        }
-
-        private void comboBox5_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            ini.IniWriteValue("校验位", "Parity", comboBox5.Text);
-        }
-
-        private void serialPort1_DataReceived(object sender, SerialDataReceivedEventArgs e)
-        {
+            var serial = (SerialPort)sender;
+            byte[] buffer = new byte[512];
+            var receiveLen = serial.Read(buffer, 0, buffer.Length);
+            var temp = new byte[receiveLen];
+            Array.Copy(buffer, 0, temp, 0, receiveLen);
             if (radioButton2.Checked)
             {
-                var serial = (SerialPort)sender;
-                byte[] buffer = new byte[512];
-                var receiveLen = serial.Read(buffer, 0, buffer.Length);
-                var temp = new byte[receiveLen];
-                Array.Copy(buffer, 0, temp, 0, receiveLen);
-                this.BeginInvoke(new GenerateInfo(GenerateInfoCallBack), temp);
+                
+                UpdateLogTxt(string.Join(" ",Array.ConvertAll(temp,p=>p.ToString("x2"))));
+                this.BeginInvoke(new GenerateInfo(GenerateInfoCallBack),serial,temp);
             }
             else if (radioButton1.Checked)
             {
-                serialPort1.Encoding = Encoding.GetEncoding("GB2312");
-                UpadteLogTxt(serialPort1.ReadExisting());
+                UpdateLogTxt(Encoding.UTF8.GetString(temp));
             }
         }
-        private void GenerateInfoCallBack(byte[] temp)
+
+        /// <summary>
+        /// 委托返回方法
+        /// </summary>
+        /// <param name="serial"></param>
+        /// <param name="temp"></param>
+        private void GenerateInfoCallBack(SerialPort serial,byte[] temp)
         {
             var tmpLst = new List<byte>();
             if (temp.Length > 5)
@@ -228,6 +262,7 @@ namespace ModBus
                     tmpLst.Add(0);
                     tmpLst.Add(0);
                     tmpLst.Add(0);
+                    serial.Write(tmpLst.ToArray(),0,tmpLst.Count);
                 }
                 else if (cmdTyp == 5)
                 {
@@ -236,13 +271,14 @@ namespace ModBus
                     foreach (var item in _lst)
                     {
                         var nId = item.Name.Substring(1);
-                        if (index.ToString() == nId)
+                        if ((index+1).ToString() == nId)
                         {
                             item.Checked = state;
                             break;
                         }
                     }
                     tmpLst.AddRange(temp);
+                    serial.Write(tmpLst.ToArray(), 0, tmpLst.Count);
                 }
                 else if (cmdTyp == 4)
                 {
@@ -250,50 +286,35 @@ namespace ModBus
                     tmpLst.Add(4);
                     tmpLst.Add((byte)(num & 0x00ff));
                     tmpLst.Add((byte)((num & 0xff00) >> 8));
+                    serial.Write(tmpLst.ToArray(), 0, tmpLst.Count);
                 }
                 else
                 {
-                    UpadteLogTxt($"无此命令");
+                    UpdateLogTxt($"无此命令");
                 }
             }
             else
             {
-                UpadteLogTxt(string.Join(" ", temp));
+                UpdateLogTxt(string.Join(" ", temp));
             }
         }
-        protected void ReceiveStr(SerialPort str,Action<byte[]> action)
-        {
-            var receiveLen = 0;
-            var count = 0;
-            var lst = new List<byte>();
-            var mReset = new ManualResetEvent(false);
 
-
-            Task.Factory.StartNew(() =>
-            {
-                while (true)
-                {
-                    byte[] buffer = new byte[20];
-                    receiveLen = str.Read(buffer, 0, buffer.Length);
-
-                    if (receiveLen > 0)
-                    {
-                        var temp = new byte[receiveLen];
-                        Array.Copy(buffer, 0, temp, 0, receiveLen);
-                        action?.Invoke(temp);
-                    }
-                }
-            });
-
-
-        }
-
+        /// <summary>
+        /// 清空log
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Btn_ClearData_Click(object sender, EventArgs e)
         {
-            log_txt.Text = "";
+            log_txt.Clear();
         }
 
-        public int CheckOutputStatus(object send)
+        /// <summary>
+        /// 计算选择代码
+        /// </summary>
+        /// <param name="send"></param>
+        /// <returns></returns>
+        private int CheckOutputStatus(object send)
         {
             int checklist = 0;
             for (int xxx = 0; xxx < 16; xxx++)
@@ -318,10 +339,16 @@ namespace ModBus
             return checklist;
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        /// <summary>
+        /// 发送数据
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Button_Click(object sender, EventArgs e)
         {
             string InputAscii = textbox_ascii.Text;
             var Input_16num = textbox_16.Text;
+            UpdateLogTxt("发送数据：" + Input_16num);
             try
             {
                 if (radioButton4.Checked == true)
@@ -339,12 +366,12 @@ namespace ModBus
                         MessageBox.Show("错误:" + ex.Message);
                     }
                 }
-                if (radioButton3.Checked == true)
+                else if (radioButton3.Checked == true)
                 {
                     try
                     {
                         var list = new List<byte>();
-                        var arr = Input_16num.Split(' ');
+                        var arr = Input_16num.Trim(' ').Split(' ');
                         try
                         {
                             foreach (var s in arr)
@@ -373,7 +400,12 @@ namespace ModBus
             
         }
 
-        private void textbox_ascii_TextChanged(object sender, EventArgs e)
+        /// <summary>
+        /// ascii码发送
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void TextShow_TextChanged(object sender, EventArgs e)
         {
             string str = textbox_ascii.Text;
             byte[] array = System.Text.Encoding.ASCII.GetBytes(str);
@@ -385,25 +417,19 @@ namespace ModBus
                 asciiStr += " ";
             }
             textbox_16.Text = asciiStr;
+            UpdateLogTxt("ASCII码发送");
         }
-        public int num = 0;
+        
+        /// <summary>
+        /// 输出控制计算状态码并赋值
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void IOCheckBox_Changed(object sender, EventArgs e)
         {
-            var check = (CheckBox)sender;
             num = CheckOutputStatus(sender);
-            log_txt.AppendText(num.ToString("x2")+"\r\n");
-            //根据名字查找位置，并保存状态
-            //var index = int.Parse(check.Name.Substring(1));
-            //for(int i = 0; i < _lst.Count; i++)
-            //{
-            //    if(index == i)
-            //    {
-            //        _lst[i].Checked = check.Checked;
-            //        break;
-            //    }
-            //}
-            
-
+            UpdateLogTxt("输出控制状态码："+num.ToString("x2"));
         }
+        #endregion
     }
 }

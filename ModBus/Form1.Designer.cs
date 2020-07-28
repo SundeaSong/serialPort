@@ -110,7 +110,7 @@
             // 
             // serialPort1
             // 
-            this.serialPort1.DataReceived += new System.IO.Ports.SerialDataReceivedEventHandler(this.serialPort1_DataReceived);
+            this.serialPort1.DataReceived += new System.IO.Ports.SerialDataReceivedEventHandler(this.SerialPort_DataReceived);
             // 
             // comboBox1
             // 
@@ -119,7 +119,7 @@
             this.comboBox1.Name = "comboBox1";
             this.comboBox1.Size = new System.Drawing.Size(185, 23);
             this.comboBox1.TabIndex = 0;
-            this.comboBox1.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
+            this.comboBox1.SelectedIndexChanged += new System.EventHandler(this.ComboBox_SelectedIndexChanged);
             // 
             // groupBox1
             // 
@@ -157,7 +157,7 @@
             this.comboBox2.Name = "comboBox2";
             this.comboBox2.Size = new System.Drawing.Size(105, 23);
             this.comboBox2.TabIndex = 6;
-            this.comboBox2.SelectedIndexChanged += new System.EventHandler(this.comboBox2_SelectedIndexChanged);
+            this.comboBox2.SelectedIndexChanged += new System.EventHandler(this.ComboBox_SelectedIndexChanged);
             // 
             // label5
             // 
@@ -175,7 +175,7 @@
             this.comboBox3.Name = "comboBox3";
             this.comboBox3.Size = new System.Drawing.Size(105, 23);
             this.comboBox3.TabIndex = 7;
-            this.comboBox3.SelectedIndexChanged += new System.EventHandler(this.comboBox3_SelectedIndexChanged);
+            this.comboBox3.SelectedIndexChanged += new System.EventHandler(this.ComboBox_SelectedIndexChanged);
             // 
             // comboBox4
             // 
@@ -184,7 +184,7 @@
             this.comboBox4.Name = "comboBox4";
             this.comboBox4.Size = new System.Drawing.Size(105, 23);
             this.comboBox4.TabIndex = 8;
-            this.comboBox4.SelectedIndexChanged += new System.EventHandler(this.comboBox4_SelectedIndexChanged);
+            this.comboBox4.SelectedIndexChanged += new System.EventHandler(this.ComboBox_SelectedIndexChanged);
             // 
             // label4
             // 
@@ -202,7 +202,7 @@
             this.comboBox5.Name = "comboBox5";
             this.comboBox5.Size = new System.Drawing.Size(105, 23);
             this.comboBox5.TabIndex = 9;
-            this.comboBox5.SelectedIndexChanged += new System.EventHandler(this.comboBox5_SelectedIndexChanged);
+            this.comboBox5.SelectedIndexChanged += new System.EventHandler(this.ComboBox_SelectedIndexChanged);
             // 
             // label3
             // 
@@ -688,7 +688,7 @@
             this.textbox_ascii.Name = "textbox_ascii";
             this.textbox_ascii.Size = new System.Drawing.Size(277, 105);
             this.textbox_ascii.TabIndex = 23;
-            this.textbox_ascii.TextChanged += new System.EventHandler(this.textbox_ascii_TextChanged);
+            this.textbox_ascii.TextChanged += new System.EventHandler(this.TextShow_TextChanged);
             // 
             // CRC发送
             // 
@@ -793,7 +793,7 @@
             this.button1.TabIndex = 28;
             this.button1.Text = "发送数据";
             this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
+            this.button1.Click += new System.EventHandler(this.Button_Click);
             // 
             // radioButton3
             // 
